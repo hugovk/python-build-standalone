@@ -251,7 +251,7 @@ def derive_setup_local(
         )
 
         if info.get("build-mode") not in (None, "shared", "static"):
-            raise Exception("unsupported build-mode for extension module %s" % name)
+            raise Exception(f"unsupported build-mode for extension module {name}")
 
         if not (python_min_match and python_max_match):
             log(f"ignoring extension module {name} because Python version incompatible")
@@ -261,8 +261,7 @@ def derive_setup_local(
         if targets := info.get("disabled-targets"):
             if any(re.match(p, target_triple) for p in targets):
                 log(
-                    "disabling extension module %s because disabled for this target triple"
-                    % name
+                    f"disabling extension module {name} because disabled for this target triple"
                 )
                 disabled.add(name)
 
@@ -288,7 +287,7 @@ def derive_setup_local(
     # Parse more files in the distribution for their metadata.
 
     with tarfile.open(str(cpython_source_archive)) as tf:
-        ifh = tf.extractfile("Python-%s/Modules/Setup" % python_version)
+        ifh = tf.extractfile(f"Python-{python_version}/Modules/Setup")
         setup_lines = ifh.readlines()
 
         try:
@@ -297,7 +296,7 @@ def derive_setup_local(
         except KeyError:
             setup_bootstrap_in = []
 
-        ifh = tf.extractfile("Python-%s/Modules/config.c.in" % python_version)
+        ifh = tf.extractfile(f"Python-{python_version}/Modules/config.c.in")
         config_c_in = ifh.read()
 
     dist_modules = set()
@@ -385,33 +384,37 @@ def derive_setup_local(
 
     if missing:
         raise Exception(
-            "missing extension modules from YAML: %s" % ", ".join(sorted(missing))
+            "missing extension modules from YAML: {}".format(", ".join(sorted(missing)))
         )
 
     missing = setup_enabled_actual - setup_enabled_wanted
     if missing:
         raise Exception(
-            "Setup enabled extensions missing YAML setup-enabled annotation: %s"
-            % ", ".join(sorted(missing))
+            "Setup enabled extensions missing YAML setup-enabled annotation: {}".format(
+                ", ".join(sorted(missing))
+            )
         )
 
     extra = setup_enabled_wanted - setup_enabled_actual
     if extra:
         raise Exception(
-            "YAML setup-enabled extensions not present in Setup: %s"
-            % ", ".join(sorted(extra))
+            "YAML setup-enabled extensions not present in Setup: {}".format(
+                ", ".join(sorted(extra))
+            )
         )
 
     if missing := set(config_c_extensions) - config_c_only_wanted:
         raise Exception(
-            "config.c.in extensions missing YAML config-c-only annotation: %s"
-            % ", ".join(sorted(missing))
+            "config.c.in extensions missing YAML config-c-only annotation: {}".format(
+                ", ".join(sorted(missing))
+            )
         )
 
     if extra := config_c_only_wanted - set(config_c_extensions):
         raise Exception(
-            "YAML config-c-only extensions not present in config.c.in: %s"
-            % ", ".join(sorted(extra))
+            "YAML config-c-only extensions not present in config.c.in: {}".format(
+                ", ".join(sorted(extra))
+            )
         )
 
     # And with verification out of way, now we generate a Setup.local file
@@ -495,7 +498,7 @@ def derive_setup_local(
         line = name
 
         for source in info.get("sources", []):
-            line += " %s" % source
+            line += f" {source}"
 
         for entry in info.get("sources-conditional", []):
             if targets := entry.get("targets", []):
@@ -559,11 +562,11 @@ def derive_setup_local(
             line += f" -I/tools/deps/{path}"
 
         for lib in info.get("links", []):
-            line += " %s" % link_for_target(lib, target_triple)
+            line += f" {link_for_target(lib, target_triple)}"
 
         for entry in info.get("links-conditional", []):
             if any(re.match(p, target_triple) for p in entry["targets"]):
-                line += " %s" % link_for_target(entry["name"], target_triple)
+                line += " {}".format(link_for_target(entry["name"], target_triple))
 
         if "-apple-" in target_triple:
             for framework in info.get("frameworks", []):
@@ -596,8 +599,9 @@ def derive_setup_local(
 
         if b"=" in line:
             raise Exception(
-                "= appears in EXTRA_MODULES line; will confuse "
-                "makesetup: %s" % line.decode("utf-8")
+                "= appears in EXTRA_MODULES line; will confuse " "makesetup: {}".format(
+                    line.decode("utf-8")
+                )
             )
 
         section_lines[section].append(line)
