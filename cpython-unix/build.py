@@ -491,9 +491,7 @@ def python_build_info(
 
     if platform == "linux64":
         bi["core"]["static_lib"] = (
-            "install/lib/python{version}/config-{version}{binary_suffix}-x86_64-linux-gnu/libpython{version}{binary_suffix}.a".format(
-                version=version, binary_suffix=binary_suffix
-            )
+            f"install/lib/python{version}/config-{version}{binary_suffix}-x86_64-linux-gnu/libpython{version}{binary_suffix}.a"
         )
 
         if not musl:
@@ -514,9 +512,7 @@ def python_build_info(
             object_file_format = "elf"
     elif platform == "macos":
         bi["core"]["static_lib"] = (
-            "install/lib/python{version}/config-{version}{binary_suffix}-darwin/libpython{version}{binary_suffix}.a".format(
-                version=version, binary_suffix=binary_suffix
-            )
+            f"install/lib/python{version}/config-{version}{binary_suffix}-darwin/libpython{version}{binary_suffix}.a"
         )
         bi["core"]["shared_lib"] = "install/lib/libpython%s%s.dylib" % (
             version,
