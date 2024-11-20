@@ -1,6 +1,9 @@
+fix = true
+
 [lint]
 select = [
     "B", # flake8-bugbear
     "F", # Pyflakes (F)
     "I", # isort
+    "UP", # pyupgrade
 ]
