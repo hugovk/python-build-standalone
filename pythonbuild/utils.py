@@ -180,7 +180,7 @@ def write_package_versions(dest_path: pathlib.Path):
 
     for k, v in DOWNLOADS.items():
         p = dest_path / (f"VERSION.{k}")
-        content = "{}_VERSION := {}\n".format(k.upper().replace("-", "_"), v["version"])
+        content = f"{k.upper().replace('-', '_')}_VERSION := {v['version']}\n"
         write_if_different(p, content.encode("ascii"))
 
 
@@ -191,7 +191,7 @@ def write_cpython_version(dest_path: pathlib.Path, version: str):
     major_minor = ".".join(version.split(".")[:2])
     k = f"cpython-{major_minor}"
     p = dest_path / (f"VERSION.{k}")
-    content = "{}_VERSION := {}\n".format(k.upper().replace("-", "_"), version)
+    content = f"{k.upper().replace('-', '_')}_VERSION := {version}\n"
     write_if_different(p, content.encode("ascii"))
 
 
@@ -477,7 +477,7 @@ def add_licenses_to_extension_entry(entry):
 
             have_licenses = True
             licenses |= set(value["licenses"])
-            license_paths.add("licenses/{}".format(value["license_file"]))
+            license_paths.add(f"licenses/{value['license_file']}")
             license_public_domain = value.get("license_public_domain", False)
 
     if have_local_link and not have_licenses:

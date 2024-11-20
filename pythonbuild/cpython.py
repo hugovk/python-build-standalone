@@ -384,7 +384,7 @@ def derive_setup_local(
 
     if missing:
         raise Exception(
-            "missing extension modules from YAML: {}".format(", ".join(sorted(missing)))
+            f"missing extension modules from YAML: {', '.join(sorted(missing))}"
         )
 
     missing = setup_enabled_actual - setup_enabled_wanted
@@ -566,7 +566,7 @@ def derive_setup_local(
 
         for entry in info.get("links-conditional", []):
             if any(re.match(p, target_triple) for p in entry["targets"]):
-                line += " {}".format(link_for_target(entry["name"], target_triple))
+                line += f" {link_for_target(entry['name'], target_triple)}"
 
         if "-apple-" in target_triple:
             for framework in info.get("frameworks", []):

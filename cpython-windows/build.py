@@ -190,7 +190,7 @@ def log(msg):
 
 
 def exec_and_log(args, cwd, env, exit_on_error=True):
-    log("executing {}".format(" ".join(args)))
+    log(f"executing {' '.join(args)}")
 
     p = subprocess.Popen(
         args,
@@ -674,9 +674,7 @@ def build_openssl_for_arch(
 
     env = dict(os.environ)
     # Add Perl and nasm paths to front of PATH.
-    env["PATH"] = "{};{};{};{}".format(
-        perl_path.parent, nasm_path, jom_path, env["PATH"]
-    )
+    env["PATH"] = f"{perl_path.parent};{nasm_path};{jom_path};{env['PATH']}"
 
     source_root = build_root / (f"openssl-{openssl_version}")
 
@@ -852,7 +850,7 @@ def build_libffi(
         python_entry = DOWNLOADS[python]
         prepare_libffi = (
             td
-            / ("Python-{}".format(python_entry["version"]))
+            / (f"Python-{python_entry['version']}")
             / "PCbuild"
             / "prepare_libffi.bat"
         )
@@ -1134,7 +1132,7 @@ def collect_python_build_artifacts(
                 # intentional because EXTENSION_TO_LIBRARY_DOWNLOADS_ENTRY is
                 # manually curated and we want to fail fast.
                 licenses |= set(download_entry["licenses"])
-                license_paths.add("licenses/{}".format(download_entry["license_file"]))
+                license_paths.add(f"licenses/{download_entry['license_file']}")
                 license_public_domain = download_entry.get("license_public_domain")
 
             entry["licenses"] = list(sorted(licenses))
@@ -1622,11 +1620,7 @@ def build_cpython(
             json.dump(python_info, fh, sort_keys=True, indent=4)
 
         dest_path = BUILD / (
-            "cpython-{}-{}-{}.tar".format(
-                entry["version"],
-                target_triple,
-                build_options,
-            )
+            f"cpython-{entry['version']}-{target_triple}-{build_options}.tar"
         )
 
         data = io.BytesIO()
