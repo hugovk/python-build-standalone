@@ -215,7 +215,7 @@ def add_target_env(env, build_platform, target_triple, build_env):
 def toolchain_archive_path(package_name, host_platform):
     entry = DOWNLOADS[package_name]
 
-    basename = "{}-{}-{}.tar".format(package_name, entry["version"], host_platform)
+    basename = f"{package_name}-{entry['version']}-{host_platform}.tar"
 
     return BUILD / basename
 
@@ -299,11 +299,7 @@ def build_binutils(client, image, host_platform):
 def materialize_clang(host_platform: str, target_triple: str):
     entry = clang_toolchain(host_platform, target_triple)
     tar_zst = download_entry(entry, DOWNLOADS_PATH)
-    local_filename = "{}-{}-{}.tar".format(
-        entry,
-        DOWNLOADS[entry]["version"],
-        host_platform,
-    )
+    local_filename = f"{entry}-{DOWNLOADS[entry]['version']}-{host_platform}.tar"
 
     dctx = zstandard.ZstdDecompressor()
 
@@ -813,9 +809,7 @@ def build_cpython(
                     raise Exception("failed to retrieve glibc max symbol version")
 
                 crt_features.append(
-                    "glibc-max-symbol-version:{}".format(
-                        glibc_max_version.decode("ascii")
-                    )
+                    f"glibc-max-symbol-version:{glibc_max_version.decode('ascii')}"
                 )
 
             python_symbol_visibility = "global-default"
@@ -975,12 +969,7 @@ def main():
         log_name = args.action
     else:
         entry = DOWNLOADS[action]
-        log_name = "{}-{}-{}-{}".format(
-            action,
-            entry["version"],
-            target_triple,
-            build_options,
-        )
+        log_name = f"{action}-{entry['version']}-{target_triple}-{build_options}"
 
     log_path = BUILD / "logs" / (f"build.{log_name}.log")
 

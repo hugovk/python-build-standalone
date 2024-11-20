@@ -42,11 +42,7 @@ class ContainerContext:
         self, build_dir, package_name, host_platform, version=None
     ):
         entry = DOWNLOADS[package_name]
-        basename = "{}-{}-{}.tar".format(
-            package_name,
-            version or entry["version"],
-            host_platform,
-        )
+        basename = f"{package_name}-{version or entry['version']}-{host_platform}.tar"
 
         p = build_dir / basename
         self.copy_file(p)
@@ -162,11 +158,7 @@ class TempdirContext:
         self, build_dir, package_name, host_platform, version=None
     ):
         entry = DOWNLOADS[package_name]
-        basename = "{}-{}-{}.tar".format(
-            package_name,
-            version or entry["version"],
-            host_platform,
-        )
+        basename = f"{package_name}-{version or entry['version']}-{host_platform}.tar"
 
         p = build_dir / basename
         dest_path = self.td / "tools"
