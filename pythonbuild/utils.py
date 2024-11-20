@@ -102,8 +102,8 @@ def get_target_support_file(
     search_dir, prefix, python_version, host_platform, target_triple
 ):
     candidates = [
-        search_dir / ("%s.%s.%s" % (prefix, python_version, target_triple)),
-        search_dir / ("%s.%s.%s" % (prefix, python_version, host_platform)),
+        search_dir / (f"{prefix}.{python_version}.{target_triple}"),
+        search_dir / (f"{prefix}.{python_version}.{host_platform}"),
     ]
 
     for path in candidates:
@@ -143,25 +143,27 @@ def write_triples_makefiles(
         for host_platform in settings["host_platforms"]:
             for python in settings["pythons_supported"]:
                 makefile_path = dest_dir / (
-                    "Makefile.%s.%s.%s" % (host_platform, triple, python)
+                    f"Makefile.{host_platform}.{triple}.{python}"
                 )
 
                 lines = []
                 for need in settings.get("needs", []):
                     lines.append(
-                        "NEED_%s := 1\n"
-                        % need.upper().replace("-", "_").replace(".", "_")
+                        "NEED_{} := 1\n".format(
+                            need.upper().replace("-", "_").replace(".", "_")
+                        )
                     )
 
                 image_suffix = settings.get("docker_image_suffix", "")
 
-                lines.append("DOCKER_IMAGE_BUILD := build%s\n" % image_suffix)
-                lines.append("DOCKER_IMAGE_XCB := xcb%s\n" % image_suffix)
+                lines.append(f"DOCKER_IMAGE_BUILD := build{image_suffix}\n")
+                lines.append(f"DOCKER_IMAGE_XCB := xcb{image_suffix}\n")
 
                 entry = clang_toolchain(host_platform, triple)
                 lines.append(
-                    "CLANG_FILENAME := %s-%s-%s.tar\n"
-                    % (entry, DOWNLOADS[entry]["version"], host_platform)
+                    "CLANG_FILENAME := {}-{}-{}.tar\n".format(
+                        entry, DOWNLOADS[entry]["version"], host_platform
+                    )
                 )
 
                 lines.append(
@@ -177,8 +179,8 @@ def write_package_versions(dest_path: pathlib.Path):
     dest_path.mkdir(parents=True, exist_ok=True)
 
     for k, v in DOWNLOADS.items():
-        p = dest_path / ("VERSION.%s" % k)
-        content = "%s_VERSION := %s\n" % (k.upper().replace("-", "_"), v["version"])
+        p = dest_path / (f"VERSION.{k}")
+        content = "{}_VERSION := {}\n".format(k.upper().replace("-", "_"), v["version"])
         write_if_different(p, content.encode("ascii"))
 
 
@@ -187,9 +189,9 @@ def write_cpython_version(dest_path: pathlib.Path, version: str):
     dest_path.mkdir(parents=True, exist_ok=True)
 
     major_minor = ".".join(version.split(".")[:2])
-    k = "cpython-%s" % major_minor
-    p = dest_path / ("VERSION.%s" % k)
-    content = "%s_VERSION := %s\n" % (k.upper().replace("-", "_"), version)
+    k = f"cpython-{major_minor}"
+    p = dest_path / (f"VERSION.{k}")
+    content = "{}_VERSION := {}\n".format(k.upper().replace("-", "_"), version)
     write_if_different(p, content.encode("ascii"))
 
 
@@ -249,7 +251,7 @@ def download_to_path(url: str, path: pathlib.Path, size: int, sha256: str):
     # We download to a temporary file and rename at the end so there's
     # no chance of the final file being partially written or containing
     # bad data.
-    print("downloading %s to %s" % (url, path))
+    print(f"downloading {url} to {path}")
 
     if path.exists():
         good = True
@@ -264,12 +266,12 @@ def download_to_path(url: str, path: pathlib.Path, size: int, sha256: str):
                 good = False
 
         if good:
-            print("%s exists and passes integrity checks" % path)
+            print(f"{path} exists and passes integrity checks")
             return
 
         path.unlink()
 
-    tmp = path.with_name("%s.tmp" % path.name)
+    tmp = path.with_name(f"{path.name}.tmp")
 
     for attempt in range(5):
         try:
@@ -289,10 +291,10 @@ def download_to_path(url: str, path: pathlib.Path, size: int, sha256: str):
             print(f"urllib error on {url}; retrying: {e}")
             time.sleep(2**attempt)
     else:
-        raise Exception("download failed after multiple retries: %s" % url)
+        raise Exception(f"download failed after multiple retries: {url}")
 
     tmp.rename(path)
-    print("successfully downloaded %s" % url)
+    print(f"successfully downloaded {url}")
 
 
 def download_entry(key: str, dest_path: pathlib.Path, local_name=None) -> pathlib.Path:
@@ -427,10 +429,10 @@ def clang_toolchain(host_platform: str, target_triple: str) -> str:
 def compress_python_archive(
     source_path: pathlib.Path, dist_path: pathlib.Path, basename: str
 ):
-    dest_path = dist_path / ("%s.tar.zst" % basename)
-    temp_path = dist_path / ("%s.tar.zst.tmp" % basename)
+    dest_path = dist_path / (f"{basename}.tar.zst")
+    temp_path = dist_path / (f"{basename}.tar.zst.tmp")
 
-    print("compressing Python archive to %s" % dest_path)
+    print(f"compressing Python archive to {dest_path}")
 
     try:
         with source_path.open("rb") as ifh, temp_path.open("wb") as ofh:
@@ -444,7 +446,7 @@ def compress_python_archive(
     finally:
         temp_path.unlink(missing_ok=True)
 
-    print("%s has SHA256 %s" % (dest_path, hash_path(dest_path)))
+    print(f"{dest_path} has SHA256 {hash_path(dest_path)}")
 
     return dest_path
 
@@ -475,12 +477,12 @@ def add_licenses_to_extension_entry(entry):
 
             have_licenses = True
             licenses |= set(value["licenses"])
-            license_paths.add("licenses/%s" % value["license_file"])
+            license_paths.add("licenses/{}".format(value["license_file"]))
             license_public_domain = value.get("license_public_domain", False)
 
     if have_local_link and not have_licenses:
         raise Exception(
-            "missing license for local library for extension entry: %s" % entry
+            f"missing license for local library for extension entry: {entry}"
         )
 
     if not have_licenses:
@@ -511,7 +513,7 @@ def add_env_common(env):
 
                 key, value = line.split("=", 1)
 
-                print("adding %s from %s" % (key, env_path))
+                print(f"adding {key} from {env_path}")
                 env[key] = value
     except FileNotFoundError:
         pass
@@ -565,8 +567,9 @@ def validate_python_json(info, extension_modules):
         )
         if missing:
             raise Exception(
-                "extension modules in PYTHON.json lack metadata: %s"
-                % ", ".join(sorted(missing))
+                "extension modules in PYTHON.json lack metadata: {}".format(
+                    ", ".join(sorted(missing))
+                )
             )
 
     for name, variants in sorted(info["build_info"]["extensions"].items()):
@@ -590,8 +593,9 @@ def validate_python_json(info, extension_modules):
                 and not ext.get("license_public_domain")
             ):
                 raise Exception(
-                    "Missing license annotations for extension %s for library files %s"
-                    % (name, ", ".join(sorted(local_links)))
+                    "Missing license annotations for extension {} for library files {}".format(
+                        name, ", ".join(sorted(local_links))
+                    )
                 )
 
 
@@ -640,4 +644,4 @@ def release_download_statistics(mode="by_asset"):
     elif mode == "total":
         print("%d" % by_tag.total())
     else:
-        raise Exception("unhandled display mode: %s" % mode)
+        raise Exception(f"unhandled display mode: {mode}")

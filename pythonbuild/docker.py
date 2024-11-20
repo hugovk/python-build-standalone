@@ -30,7 +30,7 @@ def write_dockerfiles(source_dir: pathlib.Path, dest_dir: pathlib.Path):
 
 
 def build_docker_image(client, image_data: bytes, image_dir: pathlib.Path, name):
-    image_path = image_dir / ("image-%s" % name)
+    image_path = image_dir / (f"image-{name}")
 
     return ensure_docker_image(client, io.BytesIO(image_data), image_path=image_path)
 
@@ -67,7 +67,7 @@ def get_image(client, source_dir: pathlib.Path, image_dir: pathlib.Path, name):
     if client is None:
         return None
 
-    image_path = image_dir / ("image-%s" % name)
+    image_path = image_dir / (f"image-{name}")
     tar_path = image_path.with_suffix(".tar")
 
     with image_path.open("r") as fh:
@@ -97,7 +97,7 @@ def copy_file_to_container(path, container, container_path, archive_path=None):
     tf.add(str(path), dest_path)
     tf.close()
 
-    log("copying %s to container:%s/%s" % (path, container_path, dest_path))
+    log(f"copying {path} to container:{container_path}/{dest_path}")
     container.put_archive(container_path, buf.getvalue())
 
 
@@ -132,7 +132,7 @@ def container_exec(container, command, user="build", environment=None):
 
     if inspect_res["ExitCode"] != 0:
         if "PYBUILD_BREAK_ON_FAILURE" in os.environ:
-            print("to enter container: docker exec -it %s /bin/bash" % container.id)
+            print(f"to enter container: docker exec -it {container.id} /bin/bash")
             import pdb
 
             pdb.set_trace()

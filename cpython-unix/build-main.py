@@ -39,9 +39,9 @@ def main():
         elif machine == "x86_64":
             default_target_triple = "x86_64-apple-darwin"
         else:
-            raise Exception("unhandled macOS machine value: %s" % machine)
+            raise Exception(f"unhandled macOS machine value: {machine}")
     else:
-        print("Unsupported build platform: %s" % sys.platform)
+        print(f"Unsupported build platform: {sys.platform}")
         return 1
 
     parser = argparse.ArgumentParser()
@@ -115,12 +115,13 @@ def main():
 
     settings = get_target_settings(TARGETS_CONFIG, target_triple)
 
-    supported_pythons = {"cpython-%s" % p for p in settings["pythons_supported"]}
+    supported_pythons = {f"cpython-{p}" for p in settings["pythons_supported"]}
 
     if args.python not in supported_pythons:
         print(
-            "%s only supports following Pythons: %s"
-            % (target_triple, ", ".join(supported_pythons))
+            "{} only supports following Pythons: {}".format(
+                target_triple, ", ".join(supported_pythons)
+            )
         )
         return 1
 
@@ -168,13 +169,14 @@ def main():
         "3.13"
     ):
         print(
-            "Invalid build option: 'freethreaded' is only compatible with CPython 3.13+ (got %s)"
-            % env["PYBUILD_PYTHON_MAJOR_VERSION"]
+            "Invalid build option: 'freethreaded' is only compatible with CPython 3.13+ (got {})".format(
+                env["PYBUILD_PYTHON_MAJOR_VERSION"]
+            )
         )
         return 1
 
     archive_components = [
-        "cpython-%s" % cpython_version,
+        f"cpython-{cpython_version}",
         target_triple,
         args.options,
     ]

@@ -182,7 +182,7 @@ def log(msg):
         msg_str = msg
         msg_bytes = msg.encode("utf-8", "replace")
 
-    print("%s> %s" % (LOG_PREFIX[0], msg_str))
+    print(f"{LOG_PREFIX[0]}> {msg_str}")
 
     if LOG_FH[0]:
         LOG_FH[0].write(msg_bytes + b"\n")
@@ -190,7 +190,7 @@ def log(msg):
 
 
 def exec_and_log(args, cwd, env, exit_on_error=True):
-    log("executing %s" % " ".join(args))
+    log("executing {}".format(" ".join(args)))
 
     p = subprocess.Popen(
         args,
@@ -221,7 +221,7 @@ def find_vswhere():
     )
 
     if not vswhere.exists():
-        print("%s does not exist" % vswhere)
+        print(f"{vswhere} does not exist")
         sys.exit(1)
 
     return vswhere
@@ -256,7 +256,7 @@ def find_vs_path(path, msvc_version):
     p = p / path
 
     if not p.exists():
-        print("%s does not exist" % p)
+        print(f"{p} does not exist")
         sys.exit(1)
 
     return p
@@ -291,9 +291,9 @@ def static_replace_in_file(p: pathlib.Path, search, replace):
     # Build should be as deterministic as possible. Assert that wanted changes
     # actually occur.
     if search not in data:
-        raise NoSearchStringError("search string (%s) not in %s" % (search, p))
+        raise NoSearchStringError(f"search string ({search}) not in {p}")
 
-    log("replacing `%s` with `%s` in %s" % (search, replace, p))
+    log(f"replacing `{search}` with `{replace}` in {p}")
     data = data.replace(search, replace)
 
     with p.open("wb") as fh:
@@ -358,13 +358,13 @@ def hack_props(
     tcltk_commit = DOWNLOADS["tk-windows-bin"]["git_commit"]
     mpdecimal_version = DOWNLOADS["mpdecimal"]["version"]
 
-    sqlite_path = td / ("sqlite-autoconf-%s" % sqlite_version)
-    bzip2_path = td / ("bzip2-%s" % bzip2_version)
+    sqlite_path = td / (f"sqlite-autoconf-{sqlite_version}")
+    bzip2_path = td / (f"bzip2-{bzip2_version}")
     libffi_path = td / "libffi"
-    tcltk_path = td / ("cpython-bin-deps-%s" % tcltk_commit)
-    xz_path = td / ("xz-%s" % xz_version)
-    zlib_path = td / ("zlib-%s" % zlib_version)
-    mpdecimal_path = td / ("mpdecimal-%s" % mpdecimal_version)
+    tcltk_path = td / (f"cpython-bin-deps-{tcltk_commit}")
+    xz_path = td / (f"xz-{xz_version}")
+    zlib_path = td / (f"zlib-{zlib_version}")
+    mpdecimal_path = td / (f"mpdecimal-{mpdecimal_version}")
 
     openssl_root = td / "openssl" / arch
     openssl_libs_path = openssl_root / "lib"
@@ -439,7 +439,7 @@ def hack_props(
     elif arch == "win32":
         suffix = b""
     else:
-        raise Exception("unhandled architecture: %s" % arch)
+        raise Exception(f"unhandled architecture: {arch}")
 
     try:
         # CPython 3.11+ builds with OpenSSL 3.0 by default.
@@ -627,8 +627,8 @@ def run_msbuild(
         str(msbuild),
         str(pcbuild_path / "pcbuild.proj"),
         "/target:Build",
-        "/property:Configuration=%s" % configuration,
-        "/property:Platform=%s" % platform,
+        f"/property:Configuration={configuration}",
+        f"/property:Platform={platform}",
         "/maxcpucount",
         "/nologo",
         "/verbosity:normal",
@@ -636,7 +636,7 @@ def run_msbuild(
         "/property:IncludeSSL=true",
         "/property:IncludeTkinter=true",
         "/property:IncludeTests=true",
-        "/property:OverrideVersion=%s" % python_version,
+        f"/property:OverrideVersion={python_version}",
         "/property:IncludeCTypes=true",
         # We pin the Windows 10 SDK version to make builds more deterministic.
         # This can also work around known incompatibilities with the Windows 11
@@ -662,21 +662,23 @@ def build_openssl_for_arch(
 ):
     nasm_version = DOWNLOADS["nasm-windows-bin"]["version"]
 
-    log("extracting %s to %s" % (openssl_archive, build_root))
+    log(f"extracting {openssl_archive} to {build_root}")
     extract_tar_to_directory(openssl_archive, build_root)
-    log("extracting %s to %s" % (nasm_archive, build_root))
+    log(f"extracting {nasm_archive} to {build_root}")
     extract_tar_to_directory(nasm_archive, build_root)
-    log("extracting %s to %s" % (jom_archive, build_root))
+    log(f"extracting {jom_archive} to {build_root}")
     extract_zip_to_directory(jom_archive, build_root / "jom")
 
-    nasm_path = build_root / ("cpython-bin-deps-nasm-%s" % nasm_version)
+    nasm_path = build_root / (f"cpython-bin-deps-nasm-{nasm_version}")
     jom_path = build_root / "jom"
 
     env = dict(os.environ)
     # Add Perl and nasm paths to front of PATH.
-    env["PATH"] = "%s;%s;%s;%s" % (perl_path.parent, nasm_path, jom_path, env["PATH"])
+    env["PATH"] = "{};{};{};{}".format(
+        perl_path.parent, nasm_path, jom_path, env["PATH"]
+    )
 
-    source_root = build_root / ("openssl-%s" % openssl_version)
+    source_root = build_root / (f"openssl-{openssl_version}")
 
     # uplink.c tries to find the OPENSSL_Applink function exported from the current
     # executable. However, it is exported from _ssl[_d].pyd in shared builds. So
@@ -694,7 +696,7 @@ def build_openssl_for_arch(
         configure = "VC-WIN64A"
         prefix = "64"
     else:
-        print("invalid architecture: %s" % arch)
+        print(f"invalid architecture: {arch}")
         sys.exit(1)
 
     # The official CPython OpenSSL builds hack ms/uplink.c to change the
@@ -715,7 +717,7 @@ def build_openssl_for_arch(
             "no-idea",
             "no-mdc2",
             "no-tests",
-            "--prefix=/%s" % prefix,
+            f"--prefix=/{prefix}",
         ],
         source_root,
         {
@@ -737,10 +739,10 @@ def build_openssl_for_arch(
 
     # Copy the _static libraries as well.
     for l in ("crypto", "ssl"):
-        basename = "lib%s_static.lib" % l
+        basename = f"lib{l}_static.lib"
         source = source_root / basename
         dest = install_root / "lib" / basename
-        log("copying %s to %s" % (source, dest))
+        log(f"copying {source} to {dest}")
         shutil.copyfile(source, dest)
 
 
@@ -788,7 +790,7 @@ def build_openssl(
                 jom_archive=jom_archive,
             )
         else:
-            raise ValueError("unhandled arch: %s" % arch)
+            raise ValueError(f"unhandled arch: {arch}")
 
         install = td / "out"
 
@@ -850,7 +852,7 @@ def build_libffi(
         python_entry = DOWNLOADS[python]
         prepare_libffi = (
             td
-            / ("Python-%s" % python_entry["version"])
+            / ("Python-{}".format(python_entry["version"]))
             / "PCbuild"
             / "prepare_libffi.bat"
         )
@@ -906,16 +908,14 @@ def collect_python_build_artifacts(
     the files.
     """
     outputs_path = pcbuild_path / arch
-    intermediates_path = (
-        pcbuild_path / "obj" / ("%s%s_%s" % (python_majmin, arch, config))
-    )
+    intermediates_path = pcbuild_path / "obj" / (f"{python_majmin}{arch}_{config}")
 
     if not outputs_path.exists():
-        log("%s does not exist" % outputs_path)
+        log(f"{outputs_path} does not exist")
         sys.exit(1)
 
     if not intermediates_path.exists():
-        log("%s does not exist" % intermediates_path)
+        log(f"{intermediates_path} does not exist")
         sys.exit(1)
 
     # Things we want to collect:
@@ -970,7 +970,7 @@ def collect_python_build_artifacts(
             if entry.get("ignore_missing"):
                 continue
             else:
-                log("extension not present: %s" % extension)
+                log(f"extension not present: {extension}")
                 sys.exit(1)
 
         extension_projects.add(extension)
@@ -988,8 +988,9 @@ def collect_python_build_artifacts(
 
     if unknown:
         log(
-            "encountered build directory for unknown projects: %s"
-            % ", ".join(sorted(unknown))
+            "encountered build directory for unknown projects: {}".format(
+                ", ".join(sorted(unknown))
+            )
         )
         sys.exit(1)
 
@@ -1003,12 +1004,12 @@ def collect_python_build_artifacts(
             dest = dest_dir / p.name
 
             if p.suffix == ".obj":
-                log("copying object file %s to %s" % (p, dest_dir))
+                log(f"copying object file {p} to {dest_dir}")
                 shutil.copyfile(p, dest)
                 yield f
 
     def find_additional_dependencies(project: pathlib.Path):
-        vcproj = pcbuild_path / ("%s.vcxproj" % project)
+        vcproj = pcbuild_path / (f"{project}.vcxproj")
 
         with vcproj.open("r", encoding="utf8") as fh:
             for line in fh:
@@ -1029,10 +1030,10 @@ def collect_python_build_artifacts(
     elif arch == "win32":
         abi_platform = "win32"
     else:
-        raise ValueError("unhandled arch: %s" % arch)
+        raise ValueError(f"unhandled arch: {arch}")
 
     if freethreaded:
-        abi_tag = ".cp%st-%s" % (python_majmin, abi_platform)
+        abi_tag = f".cp{python_majmin}t-{abi_platform}"
         lib_suffix = "t"
     else:
         abi_tag = ""
@@ -1043,7 +1044,7 @@ def collect_python_build_artifacts(
     core_dir.mkdir(parents=True)
 
     for obj in process_project("pythoncore", core_dir):
-        res["core"]["objs"].append("build/core/%s" % obj)
+        res["core"]["objs"].append(f"build/core/{obj}")
 
     # Copy config.c into output directory, next to its object file.
     shutil.copyfile(
@@ -1058,12 +1059,12 @@ def collect_python_build_artifacts(
     exts = ("lib", "exp")
 
     for ext in exts:
-        source = outputs_path / ("python%s%s.%s" % (python_majmin, lib_suffix, ext))
-        dest = core_dir / ("python%s%s.%s" % (python_majmin, lib_suffix, ext))
-        log("copying %s" % source)
+        source = outputs_path / (f"python{python_majmin}{lib_suffix}.{ext}")
+        dest = core_dir / (f"python{python_majmin}{lib_suffix}.{ext}")
+        log(f"copying {source}")
         shutil.copyfile(source, dest)
 
-    res["core"]["shared_lib"] = "install/python%s%s.dll" % (python_majmin, lib_suffix)
+    res["core"]["shared_lib"] = f"install/python{python_majmin}{lib_suffix}.dll"
 
     # We hack up pythoncore.vcxproj and the list in it when this function
     # runs isn't totally accurate. We hardcode the list from the CPython
@@ -1094,7 +1095,7 @@ def collect_python_build_artifacts(
         entry = {
             "in_core": False,
             "objs": [],
-            "init_fn": "PyInit_%s" % ext,
+            "init_fn": f"PyInit_{ext}",
             "shared_lib": None,
             "static_lib": None,
             "links": [
@@ -1104,18 +1105,18 @@ def collect_python_build_artifacts(
         }
 
         for obj in process_project(ext, dest_dir):
-            entry["objs"].append("build/extensions/%s/%s" % (ext, obj))
+            entry["objs"].append(f"build/extensions/{ext}/{obj}")
 
         for lib in CONVERT_TO_BUILTIN_EXTENSIONS.get(ext, {}).get("shared_depends", []):
             entry["links"].append(
-                {"name": lib, "path_dynamic": "install/DLLs/%s.dll" % lib}
+                {"name": lib, "path_dynamic": f"install/DLLs/{lib}.dll"}
             )
 
         for lib in CONVERT_TO_BUILTIN_EXTENSIONS.get(ext, {}).get(
-            "shared_depends_%s" % arch, []
+            f"shared_depends_{arch}", []
         ):
             entry["links"].append(
-                {"name": lib, "path_dynamic": "install/DLLs/%s.dll" % lib}
+                {"name": lib, "path_dynamic": f"install/DLLs/{lib}.dll"}
             )
 
         if ext in EXTENSION_TO_LIBRARY_DOWNLOADS_ENTRY:
@@ -1133,7 +1134,7 @@ def collect_python_build_artifacts(
                 # intentional because EXTENSION_TO_LIBRARY_DOWNLOADS_ENTRY is
                 # manually curated and we want to fail fast.
                 licenses |= set(download_entry["licenses"])
-                license_paths.add("licenses/%s" % download_entry["license_file"])
+                license_paths.add("licenses/{}".format(download_entry["license_file"]))
                 license_public_domain = download_entry.get("license_public_domain")
 
             entry["licenses"] = list(sorted(licenses))
@@ -1143,31 +1144,28 @@ def collect_python_build_artifacts(
         res["extensions"][ext] = [entry]
 
         # Copy the extension static library.
-        ext_static = outputs_path / ("%s%s.lib" % (ext, abi_tag))
-        dest = dest_dir / ("%s%s.lib" % (ext, abi_tag))
-        log("copying static extension %s" % ext_static)
+        ext_static = outputs_path / (f"{ext}{abi_tag}.lib")
+        dest = dest_dir / (f"{ext}{abi_tag}.lib")
+        log(f"copying static extension {ext_static}")
         shutil.copyfile(ext_static, dest)
 
-        res["extensions"][ext][0]["shared_lib"] = "install/DLLs/%s%s.pyd" % (
-            ext,
-            abi_tag,
-        )
+        res["extensions"][ext][0]["shared_lib"] = f"install/DLLs/{ext}{abi_tag}.pyd"
 
     lib_dir = out_dir / "build" / "lib"
     lib_dir.mkdir()
 
     # Copy libraries for dependencies into the lib directory.
     for depend in sorted(depends_projects):
-        static_source = outputs_path / ("%s.lib" % depend)
-        static_dest = lib_dir / ("%s.lib" % depend)
+        static_source = outputs_path / (f"{depend}.lib")
+        static_dest = lib_dir / (f"{depend}.lib")
 
-        log("copying link library %s" % static_source)
+        log(f"copying link library {static_source}")
         shutil.copyfile(static_source, static_dest)
 
-        shared_source = outputs_path / ("%s.dll" % depend)
+        shared_source = outputs_path / (f"{depend}.dll")
         if shared_source.exists():
-            shared_dest = lib_dir / ("%s.dll" % depend)
-            log("copying shared library %s" % shared_source)
+            shared_dest = lib_dir / (f"{depend}.dll")
+            log(f"copying shared library {shared_source}")
             shutil.copyfile(shared_source, shared_dest)
 
     return res
@@ -1189,7 +1187,7 @@ def build_cpython(
     freethreaded = "freethreaded" in parsed_build_options
 
     msbuild = find_msbuild(msvc_version)
-    log("found MSBuild at %s" % msbuild)
+    log(f"found MSBuild at {msbuild}")
 
     # The python.props file keys off MSBUILD, so it needs to be set.
     os.environ["MSBUILD"] = str(msbuild)
@@ -1231,7 +1229,7 @@ def build_cpython(
         build_platform = "win32"
         build_directory = "win32"
     else:
-        raise ValueError("unhandled arch: %s" % arch)
+        raise ValueError(f"unhandled arch: {arch}")
 
     with tempfile.TemporaryDirectory(prefix="python-build-") as td:
         td = pathlib.Path(td)
@@ -1251,7 +1249,7 @@ def build_cpython(
                 if a is None:
                     continue
 
-                log("extracting %s to %s" % (a, td))
+                log(f"extracting {a} to {td}")
                 fs.append(e.submit(extract_tar_to_directory, a, td))
 
             for f in fs:
@@ -1272,10 +1270,10 @@ def build_cpython(
 
             source = openssl_bin_path / f
             dest = openssl_lib_path / f
-            log("copying %s to %s" % (source, dest))
+            log(f"copying {source} to {dest}")
             shutil.copyfile(source, dest)
 
-        cpython_source_path = td / ("Python-%s" % python_version)
+        cpython_source_path = td / (f"Python-{python_version}")
         pcbuild_path = cpython_source_path / "PCbuild"
 
         out_dir = td / "out"
@@ -1479,7 +1477,7 @@ def build_cpython(
         for filename in sorted(os.listdir(install_dir / "Scripts")):
             assert filename.startswith("pip") and filename.endswith(".exe")
             p = install_dir / "Scripts" / filename
-            log("removing non-functional executable: %s" % p)
+            log(f"removing non-functional executable: {p}")
             os.unlink(p)
 
         # But this leaves the Scripts directory empty, which we don't want. So
@@ -1501,7 +1499,7 @@ def build_cpython(
 
         for ext, init_fn in sorted(builtin_extensions.items()):
             if ext in build_info["extensions"]:
-                log("built-in extension should not have a build entry: %s" % ext)
+                log(f"built-in extension should not have a build entry: {ext}")
                 sys.exit(1)
 
             build_info["extensions"][ext] = [
@@ -1522,11 +1520,11 @@ def build_cpython(
 
         # Copy OpenSSL libraries as a one-off.
         for lib in ("crypto", "ssl"):
-            name = "lib%s.lib" % lib
+            name = f"lib{lib}.lib"
 
             source = td / "openssl" / build_directory / "lib" / name
             dest = out_dir / "python" / "build" / "lib" / name
-            log("copying %s to %s" % (source, dest))
+            log(f"copying {source} to {dest}")
             shutil.copyfile(source, dest)
 
         # Rename to `python.exe` when an alternative executable is built, e.g., when
@@ -1624,8 +1622,7 @@ def build_cpython(
             json.dump(python_info, fh, sort_keys=True, indent=4)
 
         dest_path = BUILD / (
-            "cpython-%s-%s-%s.tar"
-            % (
+            "cpython-{}-{}-{}.tar".format(
                 entry["version"],
                 target_triple,
                 build_options,
@@ -1722,7 +1719,7 @@ def main() -> None:
             openssl_entry = "openssl-3.0"
 
         openssl_archive = BUILD / (
-            "%s-%s-%s.tar" % (openssl_entry, target_triple, build_options)
+            f"{openssl_entry}-{target_triple}-{build_options}.tar"
         )
         if not openssl_archive.exists():
             perl_path = fetch_strawberry_perl() / "perl" / "bin" / "perl.exe"
@@ -1734,7 +1731,7 @@ def main() -> None:
                 dest_archive=openssl_archive,
             )
 
-        libffi_archive = BUILD / ("libffi-%s-%s.tar" % (target_triple, build_options))
+        libffi_archive = BUILD / (f"libffi-{target_triple}-{build_options}.tar")
         if not libffi_archive.exists():
             build_libffi(
                 args.python,
@@ -1766,17 +1763,17 @@ def main() -> None:
         dest_path = compress_python_archive(
             tar_path,
             DIST,
-            "%s-%s" % (tar_path.stem, release_tag),
+            f"{tar_path.stem}-{release_tag}",
         )
 
         # Copy to, e.g., `cpython-3.10.13+20240224-x86_64-pc-windows-msvc-shared-pgo.tar.zst`.
         # The 'shared-' prefix is no longer needed, but we're double-publishing under
         # both names during the transition period.
         filename: str = dest_path.name
-        if not filename.endswith("-%s-%s.tar.zst" % (args.options, release_tag)):
-            raise ValueError("expected filename to end with profile: %s" % filename)
-        filename = filename.removesuffix("-%s-%s.tar.zst" % (args.options, release_tag))
-        filename = filename + "-shared-%s-%s.tar.zst" % (args.options, release_tag)
+        if not filename.endswith(f"-{args.options}-{release_tag}.tar.zst"):
+            raise ValueError(f"expected filename to end with profile: {filename}")
+        filename = filename.removesuffix(f"-{args.options}-{release_tag}.tar.zst")
+        filename = filename + f"-shared-{args.options}-{release_tag}.tar.zst"
         shutil.copy2(dest_path, dest_path.with_name(filename))
 
 
