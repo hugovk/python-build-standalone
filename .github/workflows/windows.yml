@@ -44,11 +44,12 @@ jobs:
       fail-fast: false
       matrix:
         py:
-          - 'cpython-3.9'
-          - 'cpython-3.10'
-          - 'cpython-3.11'
-          - 'cpython-3.12'
-          - 'cpython-3.13'
+#          - 'cpython-3.9'
+#          - 'cpython-3.10'
+#          - 'cpython-3.11'
+#          - 'cpython-3.12'
+#          - 'cpython-3.13'
+          - 'cpython-3.14'
         vcvars:
           - 'vcvars32.bat'
           - 'vcvars64.bat'
@@ -56,12 +57,12 @@ jobs:
           - 'pgo'
 
         include:
-          - py: 'cpython-3.13'
-            vcvars: 'vcvars32.bat'
-            options: 'freethreaded+pgo'
-          - py: 'cpython-3.13'
-            vcvars: 'vcvars64.bat'
-            options: 'freethreaded+pgo'
+#          - py: 'cpython-3.13'
+#            vcvars: 'vcvars32.bat'
+#            options: 'freethreaded+pgo'
+#          - py: 'cpython-3.13'
+#            vcvars: 'vcvars64.bat'
+#            options: 'freethreaded+pgo'
 
     needs: pythonbuild
     runs-on: 'windows-2022'
