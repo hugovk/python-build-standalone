@@ -1,2 +1,6 @@
 [lint]
-select = ["F", "I", "B"]
+select = [
+    "B", # flake8-bugbear
+    "F", # Pyflakes (F)
+    "I", # isort
+]
