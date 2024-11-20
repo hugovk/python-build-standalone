@@ -677,6 +677,7 @@ const GLOBAL_EXTENSIONS: &[&str] = &[
 // _sha256 and _sha512 merged into _sha2 in 3.12.
 // _xxinterpchannels added in 3.12.
 // audioop removed in 3.13.
+// annotationlib added in 3.14.
 
 // We didn't build ctypes_test until 3.9.
 // We didn't build some test extensions until 3.9.
@@ -739,6 +740,7 @@ const GLOBAL_EXTENSIONS_PYTHON_3_14: &[&str] = &[
     "_tokenize",
     "_typing",
     "_zoneinfo",
+    "annotationlib",
 ];
 
 const GLOBAL_EXTENSIONS_MACOS: &[&str] = &["_scproxy"];
@@ -1491,7 +1493,7 @@ fn validate_extension_modules(
 
     if is_macos {
         wanted.extend(GLOBAL_EXTENSIONS_POSIX);
-        if python_major_minor == "3.13" {
+        if matches!(python_major_minor, "3.13" | "3.14") {
             wanted.remove("_crypt");
         }
         wanted.extend(GLOBAL_EXTENSIONS_MACOS);
@@ -1515,7 +1517,7 @@ fn validate_extension_modules(
         wanted.extend(GLOBAL_EXTENSIONS_POSIX);
         // TODO: If there are more differences for `GLOBAL_EXTENSIONS_POSIX` in future Python
         // versions, we should move the `_crypt` special-case into a constant
-        if python_major_minor == "3.13" {
+        if matches!(python_major_minor, "3.13" | "3.14") {
             wanted.remove("_crypt");
         }
         if matches!(python_major_minor, "3.9" | "3.10" | "3.11" | "3.12") {
@@ -1536,16 +1538,16 @@ fn validate_extension_modules(
         ]);
     }
 
-    if (is_linux || is_macos) && python_major_minor == "3.13" {
+    if (is_linux || is_macos) && matches!(python_major_minor, "3.13" | "3.14") {
         wanted.extend(["_suggestions", "_testexternalinspection"]);
     }
 
-    if (is_linux || is_macos) && matches!(python_major_minor, "3.12" | "3.13") {
+    if (is_linux || is_macos) && matches!(python_major_minor, "3.12" | "3.13" | "3.14") {
         wanted.insert("_testsinglephase");
     }
 
     // _wmi is Windows only on 3.12+.
-    if matches!(python_major_minor, "3.12" | "3.13") && is_windows {
+    if matches!(python_major_minor, "3.12" | "3.13" | "3.14") && is_windows {
         wanted.insert("_wmi");
     }
 
@@ -1668,6 +1670,8 @@ fn validate_distribution(
         "3.12"
     } else if dist_filename.starts_with("cpython-3.13.") {
         "3.13"
+    } else if dist_filename.starts_with("cpython-3.14.") {
+        "3.14"
     } else {
         return Err(anyhow!("could not parse Python version from filename"));
     };
@@ -1950,7 +1954,7 @@ fn validate_distribution(
                 false
             // For some strange reason _PyWarnings_Init is exported as part of the ABI
             } else if name == "_warnings" {
-                // But not on Python 3.13 on Windows
+                // But not on Python 3.13+ on Windows
                 if triple.contains("-windows-") {
                     matches!(python_major_minor, "3.9" | "3.10" | "3.11" | "3.12")
                 } else {

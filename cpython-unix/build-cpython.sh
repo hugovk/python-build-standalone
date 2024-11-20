@@ -70,7 +70,7 @@ cat Makefile.extra
 pushd Python-${PYTHON_VERSION}
 
 # configure doesn't support cross-compiling on Apple. Teach it.
-if [ "${PYTHON_MAJMIN_VERSION}" = "3.13" ]; then
+if [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_13}" ]; then
     patch -p1 -i ${ROOT}/patch-apple-cross-3.13.patch
 elif [ "${PYTHON_MAJMIN_VERSION}" = "3.12" ]; then
     patch -p1 -i ${ROOT}/patch-apple-cross-3.12.patch
@@ -784,7 +784,7 @@ s390x-unknown-linux-gnu)
 x86_64-unknown-linux-*)
     # In Python 3.13+, the musl target is identified in cross compiles and the output directory
     # is named accordingly.
-    if [ "${CC}" = "musl-clang" ] && [ "${PYTHON_MAJMIN_VERSION}" = "3.13" ]; then
+    if [ "${CC}" = "musl-clang" ] && [ -n "${PYTHON_MEETS_MINIMUM_VERSION_3_13}" ]; then
         PYTHON_ARCH="x86_64-linux-musl"
     else
         PYTHON_ARCH="x86_64-linux-gnu"

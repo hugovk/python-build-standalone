@@ -19,10 +19,18 @@ _bisect:
     - _bisectmodule.c
 
 _blake2:
-  sources:
-    - _blake2/blake2module.c
-    - _blake2/blake2b_impl.c
-    - _blake2/blake2s_impl.c
+  includes-conditional:
+    - path: Modules/_hacl/include
+      minimum-python-version: "3.14"
+  sources-conditional:
+    - source: _blake2/blake2module.c
+      maximum-python-version: "3.13"
+    - source: _blake2/blake2b_impl.c
+      maximum-python-version: "3.13"
+    - source: _blake2/blake2s_impl.c
+      maximum-python-version: "3.13"
+    - source: blake2module.c
+      minimum-python-version: "3.14"
 
 _bz2:
   sources:
@@ -355,6 +363,9 @@ _multiprocessing:
 _opcode:
   sources:
     - _opcode.c
+  setup-enabled-conditional:
+    - enabled: true
+      minimum-python-version: "3.14"
 
 _operator:
   setup-enabled: true
