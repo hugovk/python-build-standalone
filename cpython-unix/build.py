@@ -132,7 +132,7 @@ def add_target_env(env, build_platform, target_triple, build_env):
         elif machine == "x86_64":
             env["BUILD_TRIPLE"] = "x86_64-apple-darwin"
         else:
-            raise Exception("unhandled macOS machine value: %s" % machine)
+            raise Exception(f"unhandled macOS machine value: {machine}")
 
         # Sniff out the Apple SDK minimum deployment target from cflags and
         # export in its own variable. This is used by CPython's configure, as
@@ -176,7 +176,7 @@ def add_target_env(env, build_platform, target_triple, build_env):
             sdk_path = res.stdout.strip()
 
         if not os.path.exists(sdk_path):
-            raise Exception("macOS SDK path %s does not exist" % sdk_path)
+            raise Exception(f"macOS SDK path {sdk_path} does not exist")
 
         # Grab the version from the SDK so we can put it in PYTHON.json.
         sdk_settings_path = pathlib.Path(sdk_path) / "SDKSettings.json"
@@ -201,7 +201,7 @@ def add_target_env(env, build_platform, target_triple, build_env):
             ).stdout.strip()
 
         if not os.path.exists(host_sdk_path):
-            raise Exception("macOS host SDK path %s does not exist" % host_sdk_path)
+            raise Exception(f"macOS host SDK path {host_sdk_path} does not exist")
 
         extra_host_cflags.extend(["-isysroot", host_sdk_path])
         extra_host_ldflags.extend(["-isysroot", host_sdk_path])
@@ -215,7 +215,7 @@ def add_target_env(env, build_platform, target_triple, build_env):
 def toolchain_archive_path(package_name, host_platform):
     entry = DOWNLOADS[package_name]
 
-    basename = "%s-%s-%s.tar" % (package_name, entry["version"], host_platform)
+    basename = "{}-{}-{}.tar".format(package_name, entry["version"], host_platform)
 
     return BUILD / basename
 
@@ -253,12 +253,12 @@ def simple_build(
             build_env.install_artifact_archive(BUILD, a, target_triple, build_options)
 
         build_env.copy_file(archive)
-        build_env.copy_file(SUPPORT / ("build-%s.sh" % entry))
+        build_env.copy_file(SUPPORT / (f"build-{entry}.sh"))
 
         env = {
-            "%s_VERSION" % entry.upper().replace("-", "_").replace(".", "_"): DOWNLOADS[
-                entry
-            ]["version"],
+            "{}_VERSION".format(
+                entry.upper().replace("-", "_").replace(".", "_")
+            ): DOWNLOADS[entry]["version"],
         }
 
         add_target_env(env, host_platform, target_triple, build_env)
@@ -267,7 +267,7 @@ def simple_build(
             settings = get_targets(TARGETS_CONFIG)[target_triple]
             env["OPENSSL_TARGET"] = settings["openssl_target"]
 
-        build_env.run("build-%s.sh" % entry, environment=env)
+        build_env.run(f"build-{entry}.sh", environment=env)
 
         build_env.get_tools_archive(dest_archive, tools_path)
 
@@ -299,7 +299,7 @@ def build_binutils(client, image, host_platform):
 def materialize_clang(host_platform: str, target_triple: str):
     entry = clang_toolchain(host_platform, target_triple)
     tar_zst = download_entry(entry, DOWNLOADS_PATH)
-    local_filename = "%s-%s-%s.tar" % (
+    local_filename = "{}-{}-{}.tar".format(
         entry,
         DOWNLOADS[entry]["version"],
         host_platform,
@@ -395,7 +395,7 @@ def build_tix(
             build_env.copy_file(p)
 
         env = {
-            "TOOLCHAIN": "clang-%s" % host_platform,
+            "TOOLCHAIN": f"clang-{host_platform}",
             "TCL_VERSION": DOWNLOADS["tcl"]["version"],
             "TIX_VERSION": DOWNLOADS["tix"]["version"],
             "TK_VERSION": DOWNLOADS["tk"]["version"],
@@ -495,9 +495,8 @@ def python_build_info(
         )
 
         if not musl:
-            bi["core"]["shared_lib"] = "install/lib/libpython%s%s.so.1.0" % (
-                version,
-                binary_suffix,
+            bi["core"]["shared_lib"] = (
+                f"install/lib/libpython{version}{binary_suffix}.so.1.0"
             )
 
         if lto:
@@ -514,19 +513,18 @@ def python_build_info(
         bi["core"]["static_lib"] = (
             f"install/lib/python{version}/config-{version}{binary_suffix}-darwin/libpython{version}{binary_suffix}.a"
         )
-        bi["core"]["shared_lib"] = "install/lib/libpython%s%s.dylib" % (
-            version,
-            binary_suffix,
+        bi["core"]["shared_lib"] = (
+            f"install/lib/libpython{version}{binary_suffix}.dylib"
         )
 
         if lto:
-            object_file_format = (
-                "llvm-bitcode:%s" % DOWNLOADS["llvm-aarch64-macos"]["version"]
+            object_file_format = "llvm-bitcode:{}".format(
+                DOWNLOADS["llvm-aarch64-macos"]["version"]
             )
         else:
             object_file_format = "mach-o"
     else:
-        raise Exception("unsupported platform: %s" % platform)
+        raise Exception(f"unsupported platform: {platform}")
 
     bi["object_file_format"] = object_file_format
 
@@ -542,11 +540,11 @@ def python_build_info(
             lib = lib[2:]
 
             if platform == "linux64" and lib not in LINUX_ALLOW_SYSTEM_LIBRARIES:
-                raise Exception("unexpected library in LIBS (%s): %s" % (libs, lib))
+                raise Exception(f"unexpected library in LIBS ({libs}): {lib}")
             elif platform == "macos" and lib not in MACOS_ALLOW_SYSTEM_LIBRARIES:
-                raise Exception("unexpected library in LIBS (%s): %s" % (libs, lib))
+                raise Exception(f"unexpected library in LIBS ({libs}): {lib}")
 
-            log("adding core system link library: %s" % lib)
+            log(f"adding core system link library: {lib}")
             bi["core"]["links"].append(
                 {
                     "name": lib,
@@ -557,14 +555,12 @@ def python_build_info(
             skip = True
             framework = libs[i + 1]
             if framework not in MACOS_ALLOW_FRAMEWORKS:
-                raise Exception(
-                    "unexpected framework in LIBS (%s): %s" % (libs, framework)
-                )
+                raise Exception(f"unexpected framework in LIBS ({libs}): {framework}")
 
-            log("adding core link framework: %s" % framework)
+            log(f"adding core link framework: {framework}")
             bi["core"]["links"].append({"name": framework, "framework": True})
         else:
-            raise Exception("unknown word in LIBS (%s): %s" % (libs, lib))
+            raise Exception(f"unknown word in LIBS ({libs}): {lib}")
 
     # Object files for the core distribution are found by walking the
     # build artifacts.
@@ -581,7 +577,7 @@ def python_build_info(
             modules_objs.add(rel_path)
 
     for p in sorted(core_objs):
-        log("adding core object file: %s" % p)
+        log(f"adding core object file: {p}")
         bi["core"]["objs"].append(str(p))
 
     assert pathlib.Path("build/Modules/config.o") in modules_objs
@@ -609,7 +605,7 @@ def python_build_info(
 
         for obj in sorted(d["posix_obj_paths"]):
             obj = pathlib.Path("build") / obj
-            log("adding object file %s for extension %s" % (obj, extension))
+            log(f"adding object file {obj} for extension {extension}")
             objs.append(str(obj))
 
             # Mark object file as used so we don't include it in the core
@@ -621,7 +617,7 @@ def python_build_info(
         links = []
 
         for framework in sorted(d["frameworks"]):
-            log("adding framework %s for extension %s" % (framework, extension))
+            log(f"adding framework {framework} for extension {extension}")
             links.append({"name": framework, "framework": True})
 
         for libname in sorted(d["links"]):
@@ -630,10 +626,10 @@ def python_build_info(
             if libname.endswith(".a"):
                 continue
 
-            log("adding library %s for extension %s" % (libname, extension))
+            log(f"adding library {libname} for extension {extension}")
 
             if libname in libraries:
-                entry = {"name": libname, "path_static": "build/lib/lib%s.a" % libname}
+                entry = {"name": libname, "path_static": f"build/lib/lib{libname}.a"}
 
                 links.append(entry)
             else:
@@ -656,7 +652,7 @@ def python_build_info(
         if info.get("build-mode") == "shared":
             shared_dir = extra_metadata["python_config_vars"]["DESTSHARED"].strip("/")
             extension_suffix = extra_metadata["python_config_vars"]["EXT_SUFFIX"]
-            entry["shared_lib"] = "%s/%s%s" % (shared_dir, extension, extension_suffix)
+            entry["shared_lib"] = f"{shared_dir}/{extension}{extension_suffix}"
 
         add_licenses_to_extension_entry(entry)
 
@@ -665,7 +661,7 @@ def python_build_info(
     # Any paths left in modules_objs are not part of any extension and are
     # instead part of the core distribution.
     for p in sorted(modules_objs):
-        log("adding core object file %s" % p)
+        log(f"adding core object file {p}")
         bi["core"]["objs"].append(str(p))
 
     return bi
@@ -684,18 +680,18 @@ def build_cpython(
 ):
     """Build CPython in a Docker image'"""
     parsed_build_options = set(build_options.split("+"))
-    entry_name = "cpython-%s" % version
+    entry_name = f"cpython-{version}"
     entry = DOWNLOADS[entry_name]
     if not python_source:
         python_version = entry["version"]
         python_archive = download_entry(entry_name, DOWNLOADS_PATH)
     else:
         python_version = os.environ["PYBUILD_PYTHON_VERSION"]
-        python_archive = DOWNLOADS_PATH / ("Python-%s.tar.xz" % python_version)
-        print("Compressing %s to %s" % (python_source, python_archive))
+        python_archive = DOWNLOADS_PATH / (f"Python-{python_version}.tar.xz")
+        print(f"Compressing {python_source} to {python_archive}")
         with python_archive.open("wb") as fh:
             create_tar_from_directory(
-                fh, python_source, path_prefix="Python-%s" % python_version
+                fh, python_source, path_prefix=f"Python-{python_version}"
             )
 
     setuptools_archive = download_entry("setuptools", DOWNLOADS_PATH)
@@ -775,7 +771,7 @@ def build_cpython(
             "PYTHON_VERSION": python_version,
             "PYTHON_MAJMIN_VERSION": ".".join(python_version.split(".")[0:2]),
             "SETUPTOOLS_VERSION": DOWNLOADS["setuptools"]["version"],
-            "TOOLCHAIN": "clang-%s" % host_platform,
+            "TOOLCHAIN": f"clang-{host_platform}",
         }
 
         # Set environment variables allowing convenient testing for Python
@@ -817,7 +813,9 @@ def build_cpython(
                     raise Exception("failed to retrieve glibc max symbol version")
 
                 crt_features.append(
-                    "glibc-max-symbol-version:%s" % glibc_max_version.decode("ascii")
+                    "glibc-max-symbol-version:{}".format(
+                        glibc_max_version.decode("ascii")
+                    )
                 )
 
             python_symbol_visibility = "global-default"
@@ -827,7 +825,7 @@ def build_cpython(
             extension_module_loading.append("shared-library")
             crt_features.append("libSystem")
         else:
-            raise ValueError("unhandled platform: %s" % host_platform)
+            raise ValueError(f"unhandled platform: {host_platform}")
 
         extra_metadata = json.loads(build_env.get_file("metadata.json"))
 
@@ -915,7 +913,7 @@ def main():
             client = docker.from_env()
             client.ping()
         except Exception as e:
-            print("unable to connect to Docker: %s" % e, file=sys.stderr)
+            print(f"unable to connect to Docker: {e}", file=sys.stderr)
             return 1
 
     parser = argparse.ArgumentParser()
@@ -970,21 +968,21 @@ def main():
     elif args.action == "makefiles":
         log_name = "makefiles"
     elif args.action.startswith("image-"):
-        log_name = "image-%s" % action
+        log_name = f"image-{action}"
     elif args.toolchain:
-        log_name = "%s-%s" % (action, host_platform)
+        log_name = f"{action}-{host_platform}"
     elif args.action.startswith("cpython-") and args.action.endswith("-host"):
         log_name = args.action
     else:
         entry = DOWNLOADS[action]
-        log_name = "%s-%s-%s-%s" % (
+        log_name = "{}-{}-{}-{}".format(
             action,
             entry["version"],
             target_triple,
             build_options,
         )
 
-    log_path = BUILD / "logs" / ("build.%s.log" % log_name)
+    log_path = BUILD / "logs" / (f"build.{log_name}.log")
 
     with log_path.open("wb") as log_fh:
         set_logger(action, log_fh)
@@ -1004,7 +1002,7 @@ def main():
 
         elif action.startswith("image-"):
             image_name = action[6:]
-            image_path = BUILD / ("%s.Dockerfile" % image_name)
+            image_path = BUILD / (f"{image_name}.Dockerfile")
             with image_path.open("rb") as fh:
                 image_data = fh.read()
 
@@ -1216,7 +1214,7 @@ def main():
             )
 
         else:
-            print("unknown build action: %s" % action)
+            print(f"unknown build action: {action}")
             return 1
 
 
