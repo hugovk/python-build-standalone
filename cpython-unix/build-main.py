@@ -68,6 +68,7 @@ def main():
             "cpython-3.11",
             "cpython-3.12",
             "cpython-3.13",
+            "cpython-3.14",
         },
         default="cpython-3.11",
         help="Python distribution to build",
@@ -166,7 +167,8 @@ def main():
 
     # Guard against accidental misuse of the free-threaded flag with older versions
     if "freethreaded" in args.options and env["PYBUILD_PYTHON_MAJOR_VERSION"] not in (
-        "3.13"
+        "3.13",
+        "3.14",
     ):
         print(
             "Invalid build option: 'freethreaded' is only compatible with CPython 3.13+ (got {})".format(

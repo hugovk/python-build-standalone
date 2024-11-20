@@ -64,6 +64,13 @@ jobs:
 #            vcvars: 'vcvars64.bat'
 #            options: 'freethreaded+pgo'
 
+          - py: 'cpython-3.14'
+            vcvars: 'vcvars32.bat'
+            options: 'freethreaded+pgo'
+          - py: 'cpython-3.14'
+            vcvars: 'vcvars64.bat'
+            options: 'freethreaded+pgo'
+
     needs: pythonbuild
     runs-on: 'windows-2022'
     steps:

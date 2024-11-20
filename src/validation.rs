@@ -301,6 +301,26 @@ static DARWIN_ALLOWED_DYLIBS: Lazy<Vec<MachOAllowedDylib>> = Lazy::new(|| {
                 required: false,
             },
             MachOAllowedDylib {
+                name: "@executable_path/../lib/libpython3.14.dylib".to_string(),
+                max_compatibility_version: "3.14.0".try_into().unwrap(),
+                required: false,
+            },
+            MachOAllowedDylib {
+                name: "@executable_path/../lib/libpython3.14d.dylib".to_string(),
+                max_compatibility_version: "3.14.0".try_into().unwrap(),
+                required: false,
+            },
+            MachOAllowedDylib {
+                name: "@executable_path/../lib/libpython3.14t.dylib".to_string(),
+                max_compatibility_version: "3.14.0".try_into().unwrap(),
+                required: false,
+            },
+            MachOAllowedDylib {
+                name: "@executable_path/../lib/libpython3.14td.dylib".to_string(),
+                max_compatibility_version: "3.14.0".try_into().unwrap(),
+                required: false,
+            },
+            MachOAllowedDylib {
                 name: "/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit".to_string(),
                 max_compatibility_version: "45.0.0".try_into().unwrap(),
                 required: true,
@@ -700,6 +720,17 @@ const GLOBAL_EXTENSIONS_PYTHON_3_12: &[&str] = &[
 ];
 
 const GLOBAL_EXTENSIONS_PYTHON_3_13: &[&str] = &[
+    "_interpchannels",
+    "_interpqueues",
+    "_interpreters",
+    "_sha2",
+    "_sysconfig",
+    "_tokenize",
+    "_typing",
+    "_zoneinfo",
+];
+
+const GLOBAL_EXTENSIONS_PYTHON_3_14: &[&str] = &[
     "_interpchannels",
     "_interpqueues",
     "_interpreters",
@@ -1449,6 +1480,9 @@ fn validate_extension_modules(
         }
         "3.13" => {
             wanted.extend(GLOBAL_EXTENSIONS_PYTHON_3_13);
+        }
+        "3.14" => {
+            wanted.extend(GLOBAL_EXTENSIONS_PYTHON_3_14);
         }
         _ => {
             panic!("unhandled Python version: {}", python_major_minor);
