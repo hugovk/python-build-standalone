@@ -599,7 +599,7 @@ def derive_setup_local(
 
         if b"=" in line:
             raise Exception(
-                "= appears in EXTRA_MODULES line; will confuse " "makesetup: {}".format(
+                "= appears in EXTRA_MODULES line; will confuse makesetup: {}".format(
                     line.decode("utf-8")
                 )
             )
