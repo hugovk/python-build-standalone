@@ -961,7 +961,7 @@ def collect_python_build_artifacts(
     # Projects that provide extensions.
     extension_projects = set()
 
-    dirs = {p for p in os.listdir(intermediates_path)}
+    dirs = set(os.listdir(intermediates_path))
 
     for extension, entry in CONVERT_TO_BUILTIN_EXTENSIONS.items():
         if extension not in dirs:
@@ -1135,8 +1135,8 @@ def collect_python_build_artifacts(
                 license_paths.add(f"licenses/{download_entry['license_file']}")
                 license_public_domain = download_entry.get("license_public_domain")
 
-            entry["licenses"] = list(sorted(licenses))
-            entry["license_paths"] = list(sorted(license_paths))
+            entry["licenses"] = sorted(licenses)
+            entry["license_paths"] = sorted(license_paths)
             entry["license_public_domain"] = license_public_domain
 
         res["extensions"][ext] = [entry]
