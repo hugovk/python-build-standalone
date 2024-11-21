@@ -632,7 +632,7 @@ def derive_setup_local(
     }
 
 
-RE_INITTAB_ENTRY = re.compile('\{"([^"]+)", ([^\}]+)\},')
+RE_INITTAB_ENTRY = re.compile(r'\{"([^"]+)", ([^\}]+)\},')
 
 
 def parse_config_c(s: str):

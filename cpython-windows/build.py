@@ -300,7 +300,7 @@ def static_replace_in_file(p: pathlib.Path, search, replace):
         fh.write(data)
 
 
-OPENSSL_PROPS_REMOVE_RULES_LEGACY = b"""
+OPENSSL_PROPS_REMOVE_RULES_LEGACY = rb"""
   <ItemGroup>
     <_SSLDLL Include="$(opensslOutDir)\libcrypto$(_DLLSuffix).dll" />
     <_SSLDLL Include="$(opensslOutDir)\libcrypto$(_DLLSuffix).pdb" />
@@ -315,7 +315,7 @@ OPENSSL_PROPS_REMOVE_RULES_LEGACY = b"""
   </Target>
 """
 
-OPENSSL_PROPS_REMOVE_RULES = b"""
+OPENSSL_PROPS_REMOVE_RULES = rb"""
   <ItemGroup>
     <_SSLDLL Include="$(opensslOutDir)\libcrypto$(_DLLSuffix).dll" />
     <_SSLDLL Include="$(opensslOutDir)\libcrypto$(_DLLSuffix).pdb" />
