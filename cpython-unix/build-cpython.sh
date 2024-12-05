@@ -58,8 +58,6 @@ pushd pip-tmp
 unzip "${PIP_WHEEL}"
 rm -f "${PIP_WHEEL}"
 
-patch -p1 -i ${ROOT}/patch-pip-static-binary.patch
-
 zip -r "${PIP_WHEEL}" *
 popd
 rm -rf pip-tmp
@@ -858,7 +856,8 @@ def fix_shebang(full):
 
         lines.extend([
             b"#!/bin/sh\n",
-            b'"exec" "\$(dirname \$0)/python${PYTHON_MAJMIN_VERSION}${PYTHON_BINARY_SUFFIX}" "\$0" "\$@"\n',
+            b"'''exec' \"\$(dirname -- \"\$(realpath -- \"\$0\")\")/python${PYTHON_MAJMIN_VERSION}${PYTHON_BINARY_SUFFIX}\" \"\$0\" \"\$@\"\n",
+            b"' '''\n",
         ])
 
         lines.extend(fh)
