@@ -569,7 +569,7 @@ def add_env_common(env):
 
     env_path = os.path.expanduser("~/.python-build-standalone-env")
     try:
-        with open(env_path, "r") as fh:
+        with open(env_path) as fh:
             for line in fh:
                 line = line.strip()
                 if line.startswith("#"):
