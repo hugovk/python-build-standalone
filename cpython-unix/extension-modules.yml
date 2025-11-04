@@ -407,11 +407,6 @@ _opcode:
 _operator:
   setup-enabled: true
 
-_peg_parser:
-  minimum-python-version: "3.9"
-  maximum-python-version: "3.9"
-  setup-enabled: true
-
 _pickle:
   sources:
     - _pickle.c
@@ -549,8 +544,6 @@ _sqlite3:
     - define: SQLITE_OMIT_LOAD_EXTENSION=1
       targets:
         - .*-ios
-    - define: "MODULE_NAME=\\\"sqlite3\\\""
-      maximum-python-version: "3.9"
   links:
     - sqlite3
 
@@ -608,7 +601,7 @@ _sysconfig:
     - _sysconfig.c
 
 _testbuffer:
-  minimum-python-version: '3.9'
+  minimum-python-version: '3.10'
   sources:
     - _testbuffer.c
 
@@ -628,7 +621,7 @@ _testexternalinspection:
     - _testexternalinspection.c
 
 _testimportmultiple:
-  minimum-python-version: '3.9'
+  minimum-python-version: '3.10'
   sources:
     - _testimportmultiple.c
 
@@ -656,7 +649,7 @@ _testinternalcapi:
       minimum-python-version: "3.14"
 
 _testmultiphase:
-  minimum-python-version: '3.9'
+  minimum-python-version: '3.10'
   sources:
     - _testmultiphase.c
 
@@ -749,13 +742,13 @@ _xxinterpchannels:
     - _xxinterpchannelsmodule.c
 
 _xxsubinterpreters:
-  minimum-python-version: '3.9'
+  minimum-python-version: '3.10'
   maximum-python-version: '3.12'
   sources:
     - _xxsubinterpretersmodule.c
 
 _xxtestfuzz:
-  minimum-python-version: '3.9'
+  minimum-python-version: '3.10'
   sources:
     - _xxtestfuzz/_xxtestfuzz.c
     - _xxtestfuzz/fuzzer.c
@@ -771,7 +764,7 @@ _zstd:
     - zstd
 
 _zoneinfo:
-  minimum-python-version: "3.9"
+  minimum-python-version: "3.10"
   sources:
     - _zoneinfo.c
 
@@ -878,7 +871,7 @@ ossaudiodev:
     - ossaudiodev.c
 
 parser:
-  maximum-python-version: "3.9"
+  maximum-python-version: "3.10"
   sources:
     - parsermodule.c
 

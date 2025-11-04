@@ -303,16 +303,6 @@ static ELF_ALLOWED_LIBRARIES_BY_MODULE: Lazy<HashMap<&'static str, Vec<&'static 
 static DARWIN_ALLOWED_DYLIBS: Lazy<Vec<MachOAllowedDylib>> = Lazy::new(|| {
     [
             MachOAllowedDylib {
-                name: "@executable_path/../lib/libpython3.9.dylib".to_string(),
-                max_compatibility_version: "3.9.0".try_into().unwrap(),
-                required: false,
-            },
-            MachOAllowedDylib {
-                name: "@executable_path/../lib/libpython3.9d.dylib".to_string(),
-                max_compatibility_version: "3.9.0".try_into().unwrap(),
-                required: false,
-            },
-            MachOAllowedDylib {
                 name: "@executable_path/../lib/libpython3.10.dylib".to_string(),
                 max_compatibility_version: "3.10.0".try_into().unwrap(),
                 required: false,
@@ -505,16 +495,6 @@ static DARWIN_ALLOWED_DYLIBS: Lazy<Vec<MachOAllowedDylib>> = Lazy::new(|| {
 
 static IOS_ALLOWED_DYLIBS: Lazy<Vec<MachOAllowedDylib>> = Lazy::new(|| {
     [
-        MachOAllowedDylib {
-            name: "@executable_path/../lib/libpython3.9.dylib".to_string(),
-            max_compatibility_version: "3.9.0".try_into().unwrap(),
-            required: false,
-        },
-        MachOAllowedDylib {
-            name: "@executable_path/../lib/libpython3.9d.dylib".to_string(),
-            max_compatibility_version: "3.9.0".try_into().unwrap(),
-            required: false,
-        },
         MachOAllowedDylib {
             name: "@executable_path/../lib/libpython3.10.dylib".to_string(),
             max_compatibility_version: "3.10.0".try_into().unwrap(),
@@ -746,6 +726,7 @@ const GLOBAL_EXTENSIONS: &[&str] = &[
     "_json",
     "_locale",
     "_lsprof",
+    "_zoneinfo",
     "_lzma",
     "_md5",
     "_multibytecodec",
@@ -794,8 +775,6 @@ const GLOBAL_EXTENSIONS: &[&str] = &[
     "zlib",
 ];
 
-// _zoneinfo added in 3.9.
-// parser removed in 3.10.
 // _tokenize added in 3.11.
 // _typing added in 3.11.
 // _testsinglephase added in 3.12.
@@ -803,25 +782,11 @@ const GLOBAL_EXTENSIONS: &[&str] = &[
 // _xxinterpchannels added in 3.12.
 // audioop removed in 3.13.
 
-// We didn't build ctypes_test until 3.9.
-// We didn't build some test extensions until 3.9.
-
-const GLOBAL_EXTENSIONS_PYTHON_3_9: &[&str] = &[
-    "audioop",
-    "_peg_parser",
-    "_sha256",
-    "_sha512",
-    "_xxsubinterpreters",
-    "_zoneinfo",
-    "parser",
-];
-
 const GLOBAL_EXTENSIONS_PYTHON_3_10: &[&str] = &[
     "audioop",
     "_sha256",
     "_sha512",
     "_xxsubinterpreters",
-    "_zoneinfo",
 ];
 
 const GLOBAL_EXTENSIONS_PYTHON_3_11: &[&str] = &[
@@ -831,7 +796,6 @@ const GLOBAL_EXTENSIONS_PYTHON_3_11: &[&str] = &[
     "_tokenize",
     "_typing",
     "_xxsubinterpreters",
-    "_zoneinfo",
 ];
 
 const GLOBAL_EXTENSIONS_PYTHON_3_12: &[&str] = &[
@@ -841,7 +805,6 @@ const GLOBAL_EXTENSIONS_PYTHON_3_12: &[&str] = &[
     "_typing",
     "_xxinterpchannels",
     "_xxsubinterpreters",
-    "_zoneinfo",
 ];
 
 const GLOBAL_EXTENSIONS_PYTHON_3_13: &[&str] = &[
@@ -853,7 +816,6 @@ const GLOBAL_EXTENSIONS_PYTHON_3_13: &[&str] = &[
     "_sysconfig",
     "_tokenize",
     "_typing",
-    "_zoneinfo",
 ];
 
 const GLOBAL_EXTENSIONS_PYTHON_3_14: &[&str] = &[
@@ -866,7 +828,6 @@ const GLOBAL_EXTENSIONS_PYTHON_3_14: &[&str] = &[
     "_sysconfig",
     "_tokenize",
     "_typing",
-    "_zoneinfo",
     "_hmac",
     "_types",
     "_zstd",
@@ -1674,9 +1635,6 @@ fn validate_extension_modules(
     let mut wanted = BTreeSet::from_iter(GLOBAL_EXTENSIONS.iter().copied());
 
     match python_major_minor {
-        "3.9" => {
-            wanted.extend(GLOBAL_EXTENSIONS_PYTHON_3_9);
-        }
         "3.10" => {
             wanted.extend(GLOBAL_EXTENSIONS_PYTHON_3_10);
         }
@@ -1700,7 +1658,7 @@ fn validate_extension_modules(
     if is_macos {
         wanted.extend(GLOBAL_EXTENSIONS_POSIX);
 
-        if matches!(python_major_minor, "3.9" | "3.10" | "3.11" | "3.12") {
+        if matches!(python_major_minor, "3.10" | "3.11" | "3.12") {
             wanted.extend(GLOBAL_EXTENSIONS_POSIX_PRE_3_13);
         }
 
@@ -1710,7 +1668,7 @@ fn validate_extension_modules(
     if is_windows {
         wanted.extend(GLOBAL_EXTENSIONS_WINDOWS);
 
-        if matches!(python_major_minor, "3.9" | "3.10" | "3.11" | "3.12") {
+        if matches!(python_major_minor, "3.10" | "3.11" | "3.12") {
             wanted.extend(GLOBAL_EXTENSIONS_WINDOWS_PRE_3_13);
         }
 
@@ -1728,15 +1686,15 @@ fn validate_extension_modules(
     if is_linux {
         wanted.extend(GLOBAL_EXTENSIONS_POSIX);
 
-        if matches!(python_major_minor, "3.9" | "3.10" | "3.11" | "3.12") {
+        if matches!(python_major_minor, "3.10" | "3.11" | "3.12") {
             wanted.extend(GLOBAL_EXTENSIONS_POSIX_PRE_3_13);
         }
 
-        if matches!(python_major_minor, "3.9" | "3.10" | "3.11" | "3.12") {
+        if matches!(python_major_minor, "3.10" | "3.11" | "3.12") {
             wanted.extend(GLOBAL_EXTENSIONS_LINUX_PRE_3_13);
         }
 
-        if !is_linux_musl && matches!(python_major_minor, "3.9" | "3.10" | "3.11" | "3.12") {
+        if !is_linux_musl && matches!(python_major_minor, "3.10" | "3.11" | "3.12") {
             wanted.insert("ossaudiodev");
         }
     }
@@ -1868,9 +1826,7 @@ fn validate_distribution(
             )
         })?;
 
-    let python_major_minor = if dist_filename.starts_with("cpython-3.9.") {
-        "3.9"
-    } else if dist_filename.starts_with("cpython-3.10.") {
+    let python_major_minor = if dist_filename.starts_with("cpython-3.10.") {
         "3.10"
     } else if dist_filename.starts_with("cpython-3.11.") {
         "3.11"
@@ -2161,7 +2117,7 @@ fn validate_distribution(
             } else if name == "_warnings" {
                 // But not on Python 3.13 on Windows
                 if triple.contains("-windows-") {
-                    matches!(python_major_minor, "3.9" | "3.10" | "3.11" | "3.12")
+                    matches!(python_major_minor, "3.10" | "3.11" | "3.12")
                 } else {
                     true
                 }

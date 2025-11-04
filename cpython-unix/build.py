@@ -444,7 +444,7 @@ def build_cpython_host(
 
         # Set environment variables allowing convenient testing for Python
         # version ranges.
-        for v in ("3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"):
+        for v in ("3.10", "3.11", "3.12", "3.13", "3.14", "3.15"):
             normal_version = v.replace(".", "_")
 
             if meets_python_minimum_version(python_version, v):
@@ -761,7 +761,7 @@ def build_cpython(
                 static="static" in build_options,
             )
 
-        packages = target_needs(TARGETS_CONFIG, target_triple, python_version)
+        packages = target_needs(TARGETS_CONFIG, target_triple)
         # Toolchain packages are handled specially.
         packages.discard("binutils")
         packages.discard("musl")
@@ -817,7 +817,7 @@ def build_cpython(
 
         # Set environment variables allowing convenient testing for Python
         # version ranges.
-        for v in ("3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"):
+        for v in ("3.10", "3.11", "3.12", "3.13", "3.14", "3.15"):
             normal_version = v.replace(".", "_")
 
             if meets_python_minimum_version(python_version, v):
@@ -1272,7 +1272,6 @@ def main():
             )
 
         elif action in (
-            "cpython-3.9",
             "cpython-3.10",
             "cpython-3.11",
             "cpython-3.12",
