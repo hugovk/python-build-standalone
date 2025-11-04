@@ -9,7 +9,7 @@
 import argparse
 import json
 import sys
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 from packaging.version import Version
