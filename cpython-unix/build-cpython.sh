@@ -85,8 +85,6 @@ if [ -n "${CROSS_COMPILING}" ]; then
     fi
 fi
 
-patch -p1 -i ${ROOT}/patch-xopen-source-ios.patch
-
 # LIBTOOL_CRUFT is unused and breaks cross-compiling on macOS. Nuke it.
 # Submitted upstream at https://github.com/python/cpython/pull/101048.
 if [ -n "${PYTHON_MEETS_MAXIMUM_VERSION_3_11}" ]; then
