@@ -549,49 +549,6 @@ x86_64-apple-darwin:
     - zstd
   openssl_target: darwin64-x86_64-cc
 
-x86_64-apple-watchos:
-  host_platforms:
-    - macos_arm64
-    - macos_x86_64
-  pythons_supported:
-    - '3.9'
-  needs_toolchain: true
-  apple_sdk_platform: watchsimulator
-  host_cc: clang
-  host_cxx: clang++
-  target_cc: clang
-  target_cxx: clang++
-  target_cflags:
-    - '-arch'
-    - 'x86_64'
-    - '-mwatchsimulator-version-min=7.0'
-    # Suppress extremely verbose warnings we see with LLVM 10.
-    - '-Wno-nullability-completeness'
-    - '-Wno-expansion-to-defined'
-    # LLVM 11 contains commit https://reviews.llvm.org/D83250,
-    # which enables -Werror for undef-prefix=TARGET_OS_.
-    # However, the macOS SDK has headers that reference deprecated
-    # TARGET_OS defines, like TARGET_OS_EMBEDDED. So LLVM 11 refuses
-    # to work with the macOS SDKs out of the box. We work around
-    # this by undoing the -Werror=undef-prefix in that commit.
-    - '-Wno-undef-prefix'
-    - '-fvisibility=hidden'
-  target_ldflags:
-    - '-arch'
-    - 'x86_64'
-    - '-mwatchsimulator-version-min=7.0'
-  needs:
-    - autoconf
-    - bzip2
-    - expat
-    - m4
-    - mpdecimal
-    - openssl-3.5
-    - sqlite
-    - xz
-    - zstd
-  openssl_target: todo
-
 x86_64-unknown-linux-gnu:
   host_platforms:
     - linux_x86_64
