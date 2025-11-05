@@ -32,7 +32,6 @@ use {
 
 const RECOGNIZED_TRIPLES: &[&str] = &[
     "aarch64-apple-darwin",
-    "aarch64-apple-ios",
     "aarch64-pc-windows-msvc",
     "aarch64-unknown-linux-gnu",
     "aarch64-unknown-linux-musl",
@@ -562,7 +561,6 @@ static ALLOWED_DYLIBS_BY_MODULE: Lazy<HashMap<&'static str, Vec<MachOAllowedDyli
 static PLATFORM_TAG_BY_TRIPLE: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| {
     [
         ("aarch64-apple-darwin", "macosx-11.0-arm64"),
-        ("aarch64-apple-ios", "iOS-aarch64"),
         ("aarch64-pc-windows-msvc", "win-arm64"),
         ("aarch64-unknown-linux-gnu", "linux-aarch64"),
         ("aarch64-unknown-linux-musl", "linux-aarch64"),
@@ -882,7 +880,6 @@ fn allowed_dylibs_for_triple(triple: &str) -> Vec<MachOAllowedDylib> {
     match triple {
         "aarch64-apple-darwin" => DARWIN_ALLOWED_DYLIBS.clone(),
         "x86_64-apple-darwin" => DARWIN_ALLOWED_DYLIBS.clone(),
-        "aarch64-apple-ios" => IOS_ALLOWED_DYLIBS.clone(),
         "x86_64-apple-ios" => IOS_ALLOWED_DYLIBS.clone(),
         _ => vec![],
     }
@@ -1224,7 +1221,6 @@ fn validate_macho<Mach: MachHeader<Endian = Endianness>>(
 
     let wanted_cpu_type = match target_triple {
         "aarch64-apple-darwin" => object::macho::CPU_TYPE_ARM64,
-        "aarch64-apple-ios" => object::macho::CPU_TYPE_ARM64,
         "x86_64-apple-darwin" => object::macho::CPU_TYPE_X86_64,
         "x86_64-apple-ios" => object::macho::CPU_TYPE_X86_64,
         _ => return Err(anyhow!("unhandled target triple: {}", target_triple)),
