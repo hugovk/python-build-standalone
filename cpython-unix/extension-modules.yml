@@ -154,7 +154,6 @@ _ctypes_test:
 _curses:
   # ncurses not available on iOS.
   disabled-targets:
-    - .*-apple-ios
     - .*-apple-tvos
     - .*-apple-watchos
   sources:
@@ -180,7 +179,6 @@ _curses:
 _curses_panel:
   # ncurses not available on iOS.
   disabled-targets:
-    - .*-apple-ios
     - .*-apple-tvos
     - .*-apple-watchos
   sources:
@@ -443,7 +441,6 @@ _scproxy:
   # _scproxy is Apple OS only.
   # APIs required by _scproxy not available on iOS.
   disabled-targets:
-    - .*-apple-ios
     - .*-unknown-linux-.*
   sources:
     - _scproxy.c
@@ -664,9 +661,6 @@ _thread:
     - .*
 
 _tkinter:
-  # tk not available on iOS.
-  disabled-targets:
-    - .*-apple-ios
   sources:
     - _tkinter.c
     - tkappinit.c
@@ -887,7 +881,6 @@ pyexpat:
 
 readline:
   disabled-targets:
-    - .*-apple-ios
     - .*-apple-tvos
     - .*-apple-watchos
   sources:
