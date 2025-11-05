@@ -154,7 +154,6 @@ _ctypes_test:
 _curses:
   # ncurses not available on iOS.
   disabled-targets:
-    - .*-apple-tvos
     - .*-apple-watchos
   sources:
     - _cursesmodule.c
@@ -179,7 +178,6 @@ _curses:
 _curses_panel:
   # ncurses not available on iOS.
   disabled-targets:
-    - .*-apple-tvos
     - .*-apple-watchos
   sources:
     - _curses_panel.c
@@ -881,7 +879,6 @@ pyexpat:
 
 readline:
   disabled-targets:
-    - .*-apple-tvos
     - .*-apple-watchos
   sources:
     - readline.c
