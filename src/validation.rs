@@ -37,7 +37,6 @@ const RECOGNIZED_TRIPLES: &[&str] = &[
     "aarch64-unknown-linux-musl",
     "armv7-unknown-linux-gnueabi",
     "armv7-unknown-linux-gnueabihf",
-    "arm64-apple-tvos",
     "i686-pc-windows-msvc",
     "i686-unknown-linux-gnu",
     // Note there's build support for mips* targets but they are not tested
