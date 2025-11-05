@@ -152,9 +152,6 @@ _ctypes_test:
     - m
 
 _curses:
-  # ncurses not available on iOS.
-  disabled-targets:
-    - .*-apple-watchos
   sources:
     - _cursesmodule.c
   defines:
@@ -176,9 +173,6 @@ _curses:
         - .*-apple-darwin
 
 _curses_panel:
-  # ncurses not available on iOS.
-  disabled-targets:
-    - .*-apple-watchos
   sources:
     - _curses_panel.c
   defines:
@@ -878,8 +872,6 @@ pyexpat:
     - expat
 
 readline:
-  disabled-targets:
-    - .*-apple-watchos
   sources:
     - readline.c
   defines:

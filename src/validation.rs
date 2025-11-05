@@ -47,7 +47,6 @@ const RECOGNIZED_TRIPLES: &[&str] = &[
     "ppc64le-unknown-linux-gnu",
     "riscv64-unknown-linux-gnu",
     "s390x-unknown-linux-gnu",
-    "thumbv7k-apple-watchos",
     "x86_64-apple-darwin",
     "x86_64-pc-windows-msvc",
     "x86_64-unknown-linux-gnu",
