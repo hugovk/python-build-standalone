@@ -49,7 +49,6 @@ const RECOGNIZED_TRIPLES: &[&str] = &[
     "s390x-unknown-linux-gnu",
     "thumbv7k-apple-watchos",
     "x86_64-apple-darwin",
-    "x86_64-apple-ios",
     "x86_64-apple-tvos",
     "x86_64-apple-watchos",
     "x86_64-pc-windows-msvc",
@@ -491,49 +490,6 @@ static DARWIN_ALLOWED_DYLIBS: Lazy<Vec<MachOAllowedDylib>> = Lazy::new(|| {
         .to_vec()
 });
 
-static IOS_ALLOWED_DYLIBS: Lazy<Vec<MachOAllowedDylib>> = Lazy::new(|| {
-    [
-        MachOAllowedDylib {
-            name: "@executable_path/../lib/libpython3.10.dylib".to_string(),
-            max_compatibility_version: "3.10.0".try_into().unwrap(),
-            required: false,
-        },
-        MachOAllowedDylib {
-            name: "@executable_path/../lib/libpython3.10d.dylib".to_string(),
-            max_compatibility_version: "3.10.0".try_into().unwrap(),
-            required: false,
-        },
-        MachOAllowedDylib {
-            name: "@executable_path/../lib/libpython3.11.dylib".to_string(),
-            max_compatibility_version: "3.11.0".try_into().unwrap(),
-            required: false,
-        },
-        MachOAllowedDylib {
-            name: "@executable_path/../lib/libpython3.11d.dylib".to_string(),
-            max_compatibility_version: "3.11.0".try_into().unwrap(),
-            required: false,
-        },
-        // For some reason, CoreFoundation is present in debug/noopt builds but not
-        // LTO builds.
-        MachOAllowedDylib {
-            name: "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation".to_string(),
-            max_compatibility_version: "150.0.0".try_into().unwrap(),
-            required: false,
-        },
-        MachOAllowedDylib {
-            name: "/usr/lib/libSystem.B.dylib".to_string(),
-            max_compatibility_version: "1.0.0".try_into().unwrap(),
-            required: true,
-        },
-        MachOAllowedDylib {
-            name: "/usr/lib/libz.1.dylib".to_string(),
-            max_compatibility_version: "1.0.0".try_into().unwrap(),
-            required: true,
-        },
-    ]
-    .to_vec()
-});
-
 static ALLOWED_DYLIBS_BY_MODULE: Lazy<HashMap<&'static str, Vec<MachOAllowedDylib>>> =
     Lazy::new(|| {
         [(
@@ -574,7 +530,6 @@ static PLATFORM_TAG_BY_TRIPLE: Lazy<HashMap<&'static str, &'static str>> = Lazy:
         ("riscv64-unknown-linux-gnu", "linux-riscv64"),
         ("s390x-unknown-linux-gnu", "linux-s390x"),
         ("x86_64-apple-darwin", "macosx-10.15-x86_64"),
-        ("x86_64-apple-ios", "iOS-x86_64"),
         ("x86_64-pc-windows-msvc", "win-amd64"),
         ("x86_64-unknown-linux-gnu", "linux-x86_64"),
         ("x86_64_v2-unknown-linux-gnu", "linux-x86_64"),
@@ -879,7 +834,6 @@ fn allowed_dylibs_for_triple(triple: &str) -> Vec<MachOAllowedDylib> {
     match triple {
         "aarch64-apple-darwin" => DARWIN_ALLOWED_DYLIBS.clone(),
         "x86_64-apple-darwin" => DARWIN_ALLOWED_DYLIBS.clone(),
-        "x86_64-apple-ios" => IOS_ALLOWED_DYLIBS.clone(),
         _ => vec![],
     }
 }
@@ -1221,7 +1175,6 @@ fn validate_macho<Mach: MachHeader<Endian = Endianness>>(
     let wanted_cpu_type = match target_triple {
         "aarch64-apple-darwin" => object::macho::CPU_TYPE_ARM64,
         "x86_64-apple-darwin" => object::macho::CPU_TYPE_X86_64,
-        "x86_64-apple-ios" => object::macho::CPU_TYPE_X86_64,
         _ => return Err(anyhow!("unhandled target triple: {}", target_triple)),
     };
 
